@@ -1,0 +1,44 @@
+name: Build Junkyard Climb APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
+
+      - name: Java installeren
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android installeren
+        uses: android-actions/setup-android@v3
+
+      - name: Android SDK 36 installeren
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Gradle installeren
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+
+      - name: Project uitpakken
+        run: unzip -o JunkyardClimb_Android_Project.zip
+
+      - name: APK bouwen
+        working-directory: JunkyardClimb_Android
+        run: gradle :app:assembleDebug
+
+      - name: APK bewaren
+        uses: actions/upload-artifact@v4
+        with:
+          name: Junkyard-Climb-APK
+          path: JunkyardClimb_Android/app/build/outputs/apk/debug/app-debug.apk
